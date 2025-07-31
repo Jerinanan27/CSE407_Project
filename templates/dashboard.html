@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Energy Monitor</title>
+  <title><h1>Smart Energy Monitor<h1></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Bootstrap 5 CSS -->
@@ -21,7 +21,7 @@
       position: relative;
       z-index: 0;
       min-height: 100vh;
-      font-size: 1.2rem; /* Increased base font size */
+      background-color: #f8f9fa;
     }
 
     body::before {
@@ -34,70 +34,287 @@
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.5;
+      opacity: 0.25; /* Reduced blurriness */
       z-index: -1;
     }
 
     .card {
-      background-color: rgba(237, 231, 231, 0.95);
-      padding: 2.5rem;
-      max-width: 1200px;
+      background-color: rgba(255, 255, 255, 0.97);
+      padding: 1.5rem; /* Reduced padding */
+      max-width: 1000px; /* Reduced max-width */
       width: 95%;
       margin: 0 auto;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
-      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 14px;
+      border: none;
     }
 
     h1 {
-      font-size: 3rem; /* Larger heading */
-      margin-bottom: 1.5rem;
+      font-size: 2.2rem; /* Slightly smaller */
+      margin-bottom: 1.2rem;
       font-weight: 600;
+      color: #08492b;
     }
 
-    h2.h5 {
-      font-size: 1.8rem; /* Larger subheading */
+    h2.h3 {
+      font-size: 1.5rem; /* Slightly smaller */
       font-weight: 500;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .reading {
-      font-size: 1.6rem; /* Larger reading text */
-      margin: 0.75rem 0;
+      margin-top: 1.4rem;
+      margin-bottom: 0.8rem;
+      color: #333;
     }
 
     .btn-on {
       background-color: #08492b;
       color: #fff;
-      font-size: 1.5rem; /* Larger button text */
-      padding: 0.8rem 2rem;
+      font-size: 1.2rem;
+      padding: 0.7rem 1.8rem;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn-on:hover {
+      background-color: #06351f;
+      transform: translateY(-2px);
     }
 
     .btn-off {
       background-color: #d12637;
       color: #fff;
-      font-size: 1.5rem; /* Larger button text */
-      padding: 0.8rem 2rem;
+      font-size: 1.2rem;
+      padding: 0.7rem 1.8rem;
+      border-radius: 8px;
+      transition: all 0.3s;
     }
 
-    /* Separate classes for each chart */
+    .btn-off:hover {
+      background-color: #a81e2c;
+      transform: translateY(-2px);
+    }
+
     .chart-wrapper.live-chart {
       position: relative;
       width: 100%;
-      height: 350px; /* Fixed height for better control */
-      margin-bottom: 2rem;
+      height: 280px;
+      margin-bottom: 1.5rem;
     }
     
     .chart-wrapper.history-chart {
       position: relative;
       width: 100%;
-      height: 500px; /* Fixed height for better control */
-      margin-bottom: 2rem;
+      height: 380px;
+      margin-bottom: 1.5rem;
     }
 
     .chart-wrapper canvas {
       width: 100% !important;
       height: 100% !important;
+    }
+    
+    /* Status badge styling */
+    .status-badge {
+      width: 100%;
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+    
+    .badge-lg {
+      font-size: 1.3rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    
+    /* Compact readings layout */
+    .readings-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1rem 0;
+    }
+    
+    .reading-card {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 10px;
+      padding: 1rem 1.4rem;
+      flex: 1;
+      min-width: 100px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .reading-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+    
+    .reading-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      color: #555;
+      font-weight: 500;
+    }
+    
+    .reading-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #0d6efd;
+      line-height: 1.2;
+    }
+    
+    .reading-unit {
+      font-size: 1.2rem; /* Increased unit size */
+      color: #777;
+      margin-left: 0.2rem;
+    }
+    
+    /* Energy row styling */
+    .energy-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.5rem 0;
+    }
+    
+    .energy-card {
+      background: linear-gradient(135deg, #f0fff4, #e6ffed);
+      border-radius: 10px;
+      padding: 1.2rem 1.6rem;
+      flex: 1;
+      min-width: 240px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      text-align: center;
+      border: 1px solid #d4edda;
+      transition: all 0.3s ease;
+    }
+    
+    .energy-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+    
+    .energy-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      color: #555;
+      font-weight: 500;
+    }
+    
+    .energy-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #198754;
+      line-height: 1.2;
+    }
+    
+    .energy-unit {
+      font-size: 1.2rem; /* Increased unit size */
+      color: #777;
+      margin-left: 0.2rem;
+    }
+    
+    /* Total energy row styling */
+    .total-energy-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.5rem 0;
+    }
+    
+    .total-energy-card {
+      background: linear-gradient(135deg, #e6f7ff, #d1ecff);
+      border-radius: 10px;
+      padding: 1.2rem;
+      flex: 1;
+      min-width: 240px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      text-align: center;
+      border: 1px solid #cce5ff;
+      transition: all 0.3s ease;
+    }
+    
+    .total-energy-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+    
+    .total-energy-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      color: #0c5460;
+      font-weight: 500;
+    }
+    
+    .total-energy-value {
+      font-size: 2.0rem; /* Slightly reduced */
+      font-weight: 700;
+      color: #004085;
+      line-height: 1.2;
+    }
+    
+    .total-energy-unit {
+      font-size: 1.3rem; /* Increased unit size */
+      color: #666;
+      margin-left: 0.3rem;
+    }
+    
+    .history-container {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .chart-container {
+      flex: 1;
+    }
+    
+    .control-buttons {
+      margin: 1.5rem 0;
+    }
+    
+    /* Bold socket status text */
+    .status-text {
+      font-weight: 600;
+    }
+    
+    @media (max-width: 992px) {
+      .history-container {
+        flex-direction: column;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 1.2rem;
+      }
+      
+      .card {
+        padding: 1.2rem;
+      }
+      
+      .readings-row, .energy-row, .total-energy-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .reading-card, .energy-card, .total-energy-card {
+        min-width: 100%;
+      }
+      
+      .reading-value, .energy-value, .total-energy-value {
+        font-size: 1.7rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2.h5 {
+        font-size: 1.4rem;
+      }
     }
   </style>
 </head>
@@ -106,52 +323,94 @@
   <div class="card text-center">
     <h1>💡 Smart Energy Monitor</h1>
 
-    <p class="reading">
-      Socket is currently:
-      <span id="statusBadge" class="badge bg-secondary fs-4">--</span> <!-- Larger badge -->
-    </p>
-    <p class="reading">
-      Power: <strong><span id="powerVal">--</span></strong> W
-    </p>
-    <p class="reading">
-      Current: <strong><span id="currentVal">--</span></strong> mA
-    </p>
+    <div class="status-badge">
+      <p class="mb-0">
+        <span class="status-text">Socket is currently:</span> 
+        <span id="statusBadge" class="badge badge-lg bg-secondary">--</span>
+      </p>
+    </div>
+    
+    <!-- First row: Power, Current, Voltage with emojis -->
+    <div class="readings-row">
+      <div class="reading-card">
+        <h3>⚡ Power</h3> <!-- Added emoji -->
+        <div><span id="powerVal" class="reading-value">--</span><span class="reading-unit">W</span></div>
+      </div>
+      
+      <div class="reading-card">
+        <h3>🔌 Current</h3> <!-- Added emoji -->
+        <div><span id="currentVal" class="reading-value">--</span><span class="reading-unit">mA</span></div>
+      </div>
+      
+      <div class="reading-card">
+        <h3>🔋 Voltage</h3> <!-- Added emoji -->
+        <div><span id="voltageVal" class="reading-value">--</span><span class="reading-unit">V</span></div>
+      </div>
+    </div>
+    
+    <!-- Second row: Today's Energy and Daily Cost with emojis -->
+    <div class="energy-row">
+      <div class="energy-card">
+        <h3>📊 Today's Energy Usage</h3> <!-- Added emoji -->
+        <div><span id="energyVal" class="energy-value">--</span><span class="energy-unit">kWh</span></div>
+      </div>
+      
+      <div class="energy-card">
+        <h3>💰 Daily Operating Cost</h3> <!-- Added emoji -->
+        <div><span id="costVal" class="energy-value">--</span><span class="energy-unit">Tk</span></div>
+      </div>
+    </div>
 
-    <p class="reading">
-      Voltage: <strong><span id="voltageVal">--</span></strong> V
-    </p>
-    <!-- Changed to daily energy usage -->
-    <p class="reading">
-      Today's Energy Usage: <strong><span id="energyVal">--</span></strong> kWh
-    </p>
-    <!-- Added daily operating cost -->
-    <p class="reading">
-      Daily Operating Cost: <strong><span id="costVal">--</span></strong> Tk
-    </p>
-
-    <div class="mt-4">
-      <button id="btn-on" class="btn btn-on btn-lg me-2">Turn ON</button>
+    <div class="control-buttons">
+      <button id="btn-on" class="btn btn-on btn-lg me-3">Turn ON</button>
       <button id="btn-off" class="btn btn-off btn-lg">Turn OFF</button>
     </div>
 
-    <div class="mt-5">
-      <h2 class="h5">Live Power (W) - Last 5 Hours</h2>
+    <div class="mt-4">
+      <h2 class="h5">Live Power (W) Chart</h2>
       <div class="chart-wrapper live-chart"><canvas id="liveChart"></canvas></div>
     </div>
 
     <div class="mt-5">
-      <h2 class="h5">Full History Power (W)</h2>
-      <div class="chart-wrapper history-chart"><canvas id="historyChart"></canvas></div>
+      <div class="history-container">
+        <div class="chart-container">
+          <h2 class="h5">Full Power(W) History </h2>
+          <!-- Total Energy Row (new row) -->
+      <div class="total-energy-row">
+        <div class="total-energy-card">
+          <h3>🔋 Total Energy Consumption</h3> <!-- Added emoji -->
+          <div><span id="totalEnergyVal" class="total-energy-value">--</span><span class="total-energy-unit">kWh</span></div>
+        </div>
+        
+        <div class="total-energy-card">
+          <h3>💰 Total Operating Cost</h3> <!-- Added emoji -->
+          <div><span id="totalCostVal" class="total-energy-value">--</span><span class="total-energy-unit">Tk</span></div>
+        </div>
+        
+        <div class="total-energy-card">
+          <h3>📈 Average Daily Energy</h3> <!-- Added emoji -->
+          <div><span id="avgEnergyVal" class="total-energy-value">--</span><span class="total-energy-unit">kWh</span></div>
+        </div>
+      </div>
+          <div class="chart-wrapper history-chart"><canvas id="historyChart"></canvas></div>
+        </div>
+      </div>
+      
+      
     </div>
   </div>
+  
 <script>
   // Electricity rate (Tk per kWh)
   const ELECTRICITY_RATE = 7.20; // Tk per kWh for residential customers
 
-  // Global variables for live chart data - now stores full readings
+  // Global variables for live chart data
   let liveReadings = Array(60).fill(null);
+  let totalEnergy = 0;
+  let totalCost = 0;
+  let avgEnergy = 0;
 
-  // Chart 1: Live Power Chart (last 60 readings = 5 hours)
+  // Chart 1: Live Power Chart (last 60 minutes)
   const liveCtx = document.getElementById('liveChart').getContext('2d');
   const liveChart = new Chart(liveCtx, {
     type: 'line',
@@ -175,7 +434,7 @@
         x: {
           ticks: {
             color: '#000',
-            font: { size: 14 },
+            font: { size: 12 },
             maxTicksLimit: 12,
             callback: function(value, index) {
               return index % 5 === 0 ? this.getLabelForValue(value) : '';
@@ -189,7 +448,7 @@
           min: 0,
           ticks: {
             color: '#000',
-            font: { size: 14 }
+            font: { size: 12 }
           },
           grid: {
             color: 'rgba(0,0,0,0.1)'
@@ -200,16 +459,15 @@
         legend: {
           labels: {
             color: '#000',
-            font: { size: 16 }
+            font: { size: 14 }
           }
         },
         tooltip: {
           backgroundColor: 'rgba(0,0,0,0.7)',
-          titleFont: { size: 16 },
-          bodyFont: { size: 14 },
-          padding: 10,
+          titleFont: { size: 14 },
+          bodyFont: { size: 12 },
+          padding: 8,
           callbacks: {
-            // Enhanced tooltip to show power, voltage and current
             label: function(context) {
               const index = context.dataIndex;
               const reading = liveReadings[index];
@@ -254,7 +512,7 @@
           offset: false,
           ticks: {
             color: '#000',
-            font: { size: 14 },
+            font: { size: 12 },
             maxTicksLimit: 30,
             autoSkip: true,
             autoSkipPadding: 10,
@@ -273,7 +531,7 @@
           min: 0,
           ticks: {
             color: '#000',
-            font: { size: 14 }
+            font: { size: 12 }
           },
           grid: {
             color: 'rgba(0,0,0,0.1)'
@@ -284,14 +542,14 @@
         legend: {
           labels: {
             color: '#000',
-            font: { size: 16 }
+            font: { size: 14 }
           }
         },
         tooltip: {
           backgroundColor: 'rgba(0,0,0,0.7)',
-          titleFont: { size: 16 },
-          bodyFont: { size: 14 },
-          padding: 10,
+          titleFont: { size: 14 },
+          bodyFont: { size: 12 },
+          padding: 8,
           callbacks: {
             title: function(tooltipItems) {
               return historyChart.data.labels[tooltipItems[0].dataIndex];
@@ -314,7 +572,7 @@
     const labels = [];
     
     for (let i = 59; i >= 0; i--) {
-      const time = new Date(now - i * 5 * 60 * 1000);
+      const time = new Date(now - i * 60 * 1000);
       labels.push(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     }
     
@@ -322,11 +580,9 @@
     liveChart.update();
   }
 
-  // Update live chart with new reading (now stores full reading)
+  // Update live chart with new reading
   function updateLiveChart(reading) {
-    // Shift out the oldest data point
     liveReadings.shift();
-    // Add new reading at the end
     liveReadings.push({
       power: reading.power,
       voltage: reading.voltage,
@@ -334,41 +590,63 @@
       timestamp: new Date()
     });
     
-    // Update labels
-    const now = new Date();
     liveChart.data.labels.shift();
+    const now = new Date();
     liveChart.data.labels.push(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     
-    // Update chart data (power only for the line chart)
     const powerData = liveReadings.map(r => r ? r.power : null);
     liveChart.data.datasets[0].data = powerData;
     liveChart.update();
   }
 
-  // Calculate daily energy and cost
-  function calculateDailyEnergyAndCost(rows) {
-    // Get today's date at midnight
+  // Calculate energy metrics
+  function calculateEnergyMetrics(rows) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     let dailyEnergy = 0;
-    let dailyCost = 0;
+    let totalEnergy = 0;
+    let firstDate = null;
+    let lastDate = null;
     
     rows.forEach(r => {
       const rowDate = new Date(r.ts);
+      
+      // Track first and last dates for average calculation
+      if (!firstDate || rowDate < firstDate) firstDate = rowDate;
+      if (!lastDate || rowDate > lastDate) lastDate = rowDate;
+      
+      // Calculate energy for this reading (5 minutes = 5/60 hours)
+      const energy = r.power * (5/60) / 1000;
+      
+      // Add to total energy
+      totalEnergy += energy;
+      
+      // Add to daily energy if today
       if (rowDate >= today) {
-        // Calculate energy in kWh: power (W) * time (hours)
-        // Each reading is 5 minutes = 5/60 hours
-        dailyEnergy += r.power * (5/60) / 1000;
+        dailyEnergy += energy;
       }
     });
     
     // Calculate daily cost
-    dailyCost = dailyEnergy * ELECTRICITY_RATE;
+    const dailyCost = dailyEnergy * ELECTRICITY_RATE;
+    
+    // Calculate total cost
+    const totalCost = totalEnergy * ELECTRICITY_RATE;
+    
+    // Calculate average daily energy
+    let avgEnergy = 0;
+    if (firstDate && lastDate) {
+      const days = Math.max(1, Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
+      avgEnergy = totalEnergy / days;
+    }
     
     return {
-      energy: dailyEnergy,
-      cost: dailyCost
+      dailyEnergy,
+      dailyCost,
+      totalEnergy,
+      totalCost,
+      avgEnergy
     };
   }
 
@@ -381,10 +659,15 @@
     historyChart.data.labels = [];
     historyChart.data.datasets[0].data = [];
 
-    // Calculate daily energy and cost
-    const daily = calculateDailyEnergyAndCost(rows);
-    document.getElementById('energyVal').textContent = daily.energy.toFixed(3);
-    document.getElementById('costVal').textContent = daily.cost.toFixed(2);
+    // Calculate energy metrics
+    const metrics = calculateEnergyMetrics(rows);
+    
+    // Update UI with metrics
+    document.getElementById('energyVal').textContent = metrics.dailyEnergy.toFixed(3);
+    document.getElementById('costVal').textContent = metrics.dailyCost.toFixed(2);
+    document.getElementById('totalEnergyVal').textContent = metrics.totalEnergy.toFixed(3);
+    document.getElementById('totalCostVal').textContent = metrics.totalCost.toFixed(2);
+    document.getElementById('avgEnergyVal').textContent = metrics.avgEnergy.toFixed(3);
 
     // Process all rows for history chart
     rows.forEach(r => {
@@ -406,13 +689,13 @@
     // Initialize live chart if not already initialized
     if (liveReadings[0] === null) {
       const now = Date.now();
-      const fiveHoursAgo = now - 5 * 60 * 60 * 1000;
+      const sixtyMinutesAgo = now - 60 * 60 * 1000;
       
-      // Fill live chart with data from last 5 hours
+      // Fill live chart with data from last 60 minutes
       rows.forEach(r => {
         const ts = new Date(r.ts).getTime();
-        if (ts > fiveHoursAgo) {
-          const position = Math.floor((ts - fiveHoursAgo) / (5 * 60 * 1000));
+        if (ts > sixtyMinutesAgo) {
+          const position = Math.floor((ts - sixtyMinutesAgo) / (60 * 1000));
           if (position >= 0 && position < 60) {
             liveReadings[position] = {
               power: r.power,
@@ -438,22 +721,19 @@
 
       const badge = document.getElementById('statusBadge');
       badge.textContent = s.switch ? 'ON' : 'OFF';
-      badge.className = 'badge ' + (s.switch ? 'bg-success' : 'bg-danger');
+      badge.className = 'badge badge-lg ' + (s.switch ? 'bg-success' : 'bg-danger');
 
+      // Update the readings
       document.getElementById('powerVal').textContent = s.power.toFixed(1);
       document.getElementById('currentVal').textContent = (s.current * 1000).toFixed(1);
       document.getElementById('voltageVal').textContent = s.voltage.toFixed(1);
       
-      // Update live chart with new reading every 5 minutes
-      const now = new Date();
-      const minutes = now.getMinutes();
-      if (minutes % 5 === 0) {
-        updateLiveChart({
-          power: s.power,
-          voltage: s.voltage,
-          current: s.current
-        });
-      }
+      // Update live chart
+      updateLiveChart({
+        power: s.power,
+        voltage: s.voltage,
+        current: s.current
+      });
     } catch (e) {
       console.error('Error fetching status:', e);
     }
