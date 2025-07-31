@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Energy Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      z-index: 0;
+      min-height: 100vh;
+      font-size: 1.2rem; /* Increased base font size */
+    }
+
+    body::before {
+      content: "";
+      background-image: url('https://images.unsplash.com/photo-1518709911915-712d5fd04677?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzF8fGVuZXJneXxlbnwwfHwwfHx8MA%3D%3D');
+      background-size: cover;
+      background-position: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    .card {
+      background-color: rgba(237, 231, 231, 0.95);
+      padding: 2.5rem;
+      max-width: 1200px;
+      width: 95%;
+      margin: 0 auto;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+    }
+
+    h1 {
+      font-size: 3rem; /* Larger heading */
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    h2.h5 {
+      font-size: 1.8rem; /* Larger subheading */
+      font-weight: 500;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .reading {
+      font-size: 1.6rem; /* Larger reading text */
+      margin: 0.75rem 0;
+    }
+
+    .btn-on {
+      background-color: #08492b;
+      color: #fff;
+      font-size: 1.5rem; /* Larger button text */
+      padding: 0.8rem 2rem;
+    }
+
+    .btn-off {
+      background-color: #d12637;
+      color: #fff;
+      font-size: 1.5rem; /* Larger button text */
+      padding: 0.8rem 2rem;
+    }
+
+    /* Separate classes for each chart */
+    .chart-wrapper.live-chart {
+      position: relative;
+      width: 100%;
+      height: 350px; /* Fixed height for better control */
+      margin-bottom: 2rem;
+    }
+    
+    .chart-wrapper.history-chart {
+      position: relative;
+      width: 100%;
+      height: 500px; /* Fixed height for better control */
+      margin-bottom: 2rem;
+    }
+
+    .chart-wrapper canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card text-center">
+    <h1>💡 Smart Energy Monitor</h1>
+
+    <p class="reading">
+      Socket is currently:
+      <span id="statusBadge" class="badge bg-secondary fs-4">--</span> <!-- Larger badge -->
+    </p>
+    <p class="reading">
+      Power: <strong><span id="powerVal">--</span></strong> W
+    </p>
+    <p class="reading">
+      Current: <strong><span id="currentVal">--</span></strong> mA
+    </p>
+
+    <p class="reading">
+      Voltage: <strong><span id="voltageVal">--</span></strong> V
+    </p>
+    <p class="reading">
+      Total Energy Consumed: <strong><span id="energyVal">--</span></strong> kWh
+    </p>
+
+    <div class="mt-4">
+      <button id="btn-on" class="btn btn-on btn-lg me-2">Turn ON</button>
+      <button id="btn-off" class="btn btn-off btn-lg">Turn OFF</button>
+    </div>
+
+    <div class="mt-5">
+      <h2 class="h5">Live Power (W) - Last 5 Hours</h2>
+      <div class="chart-wrapper live-chart"><canvas id="liveChart"></canvas></div>
+    </div>
+
+    <div class="mt-5">
+      <h2 class="h5">Full History Power (W)</h2>
+      <div class="chart-wrapper history-chart"><canvas id="historyChart"></canvas></div>
+    </div>
+  </div>
+<script>
+  // Global variables for live chart data
+  let liveChartData = Array(60).fill(null);
+  let liveChartLabels = Array(60).fill('');
+
+  // Chart 1: Live Power Chart (last 60 readings = 5 hours)
+  const liveCtx = document.getElementById('liveChart').getContext('2d');
+  const liveChart = new Chart(liveCtx, {
+    type: 'line',
+    data: {
+      labels: liveChartLabels,
+      datasets: [{
+        label: 'Live Power (W)',
+        data: liveChartData,
+        borderWidth: 3,  // Thicker line
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0,123,255,0.2)',
+        tension: 0.3,
+        pointRadius: 3,  // Visible points
+        pointBackgroundColor: '#007bff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            color: '#000',
+            font: { size: 14 },  // Larger font
+            maxTicksLimit: 12,
+            callback: function(value, index) {
+              // Only show every 5th label to prevent crowding
+              return index % 5 === 0 ? this.getLabelForValue(value) : '';
+            }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        },
+        y: {
+          min: 0,
+          ticks: {
+            color: '#000',
+            font: { size: 14 }  // Larger font
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#000',
+            font: { size: 16 }  // Larger font
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          titleFont: { size: 16 },
+          bodyFont: { size: 14 },
+          padding: 10
+        }
+      },
+      animation: {
+        duration: 1000
+      }
+    }
+  });
+
+  // Chart 2: Historical Power Chart
+  const histCtx = document.getElementById('historyChart').getContext('2d');
+  const historyChart = new Chart(histCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Historical Power (W)',
+        data: [],
+        borderWidth: 2,
+        borderColor: '#198754',
+        backgroundColor: 'rgba(25,135,84,0.1)',
+        tension: 0,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          offset: false, // Ensures chart starts at the left edge
+          ticks: {
+            color: '#000',
+            font: { size: 14 },
+            maxTicksLimit: 30, // Increased to show more labels
+            autoSkip: true,
+            autoSkipPadding: 10,
+            callback: function(value, index) {
+              // Show labels at regular intervals
+              if (index % 5 === 0) {
+                return this.getLabelForValue(value);
+              }
+              return '';
+            }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        },
+        y: {
+          min: 0,
+          ticks: {
+            color: '#000',
+            font: { size: 14 }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#000',
+            font: { size: 16 }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          titleFont: { size: 16 },
+          bodyFont: { size: 14 },
+          padding: 10,
+          callbacks: {
+            title: function(tooltipItems) {
+              // Show full timestamp in tooltip
+              return historyChart.data.labels[tooltipItems[0].dataIndex];
+            }
+          }
+        }
+      },
+      layout: {
+        padding: {
+          left: 0,
+          right: 0
+        }
+      }
+    }
+  });
+
+  // Initialize live chart with current time labels
+  function initLiveChartLabels() {
+    const now = new Date();
+    const labels = [];
+    
+    // Create labels for last 5 hours in 5-minute intervals
+    for (let i = 59; i >= 0; i--) {
+      const time = new Date(now - i * 5 * 60 * 1000);
+      labels.push(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    }
+    
+    liveChart.data.labels = labels;
+    liveChart.update();
+  }
+
+  // Update live chart with new reading
+  function updateLiveChart(power) {
+    // Shift out the oldest data point
+    liveChartData.shift();
+    // Add new data point at the end
+    liveChartData.push(power);
+    
+    // Update the current time for the last label
+    const now = new Date();
+    liveChartLabels.shift();
+    liveChartLabels.push(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    
+    // Update chart
+    liveChart.data.datasets[0].data = liveChartData;
+    liveChart.data.labels = liveChartLabels;
+    liveChart.update();
+  }
+
+  // Load historical data and initialize charts
+  async function loadHistory() {
+    const res = await fetch('/data');
+    const rows = await res.json();
+
+    // Clear history chart
+    historyChart.data.labels = [];
+    historyChart.data.datasets[0].data = [];
+
+    let totalEnergy = 0;
+
+    // Process all rows for history chart
+    rows.forEach(r => {
+      const ts = new Date(r.ts);
+      // Use more compact label format: "DD MMM HH:MM"
+      const label = ts.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        day: '2-digit',
+        month: 'short'
+      }).replace(',', ' ');
+
+      historyChart.data.labels.push(label);
+      historyChart.data.datasets[0].data.push(r.power);
+
+      totalEnergy += r.power / 1000 * (5 / 60);  // 5-minute interval
+    });
+
+    // Update total energy
+    document.getElementById('energyVal').textContent = totalEnergy.toFixed(3);
+    
+    // Update history chart
+    historyChart.update();
+    
+    // Initialize live chart if not already initialized
+    if (liveChartData[0] === null) {
+      const now = Date.now();
+      const fiveHoursAgo = now - 5 * 60 * 60 * 1000;
+      
+      // Fill live chart with data from last 5 hours
+      rows.forEach(r => {
+        const ts = new Date(r.ts).getTime();
+        if (ts > fiveHoursAgo) {
+          // Find position in chart (5-minute intervals)
+          const position = Math.floor((ts - fiveHoursAgo) / (5 * 60 * 1000));
+          if (position >= 0 && position < 60) {
+            liveChartData[position] = r.power;
+          }
+        }
+      });
+      
+      liveChart.data.datasets[0].data = liveChartData;
+      liveChart.update();
+    }
+  }
+
+  // Fetch current device status and update UI
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/status');
+      const s = await res.json();
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = s.switch ? 'ON' : 'OFF';
+      badge.className = 'badge ' + (s.switch ? 'bg-success' : 'bg-danger');
+
+      document.getElementById('powerVal').textContent = s.power.toFixed(1);
+      document.getElementById('currentVal').textContent = (s.current * 1000).toFixed(1);
+      document.getElementById('voltageVal').textContent = s.voltage.toFixed(1);
+      
+      // Update live chart with new reading every 5 minutes
+      const now = new Date();
+      const minutes = now.getMinutes();
+      if (minutes % 5 === 0) {
+        updateLiveChart(s.power);
+      }
+    } catch (e) {
+      console.error('Error fetching status:', e);
+    }
+  }
+
+  // Button Handlers
+  document.getElementById('btn-on').onclick = async () => {
+    await fetch('/on');
+    fetchStatus();
+  };
+  document.getElementById('btn-off').onclick = async () => {
+    await fetch('/off');
+    fetchStatus();
+  };
+
+  // Initialize and start app
+  initLiveChartLabels();
+  loadHistory();
+  fetchStatus();
+  
+  // Set intervals
+  setInterval(fetchStatus, 60000);       // every 1 min
+  setInterval(loadHistory, 5 * 60000);   // every 5 min
+</script>
+</body>
+</html>
