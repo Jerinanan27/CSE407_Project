@@ -120,8 +120,13 @@
     <p class="reading">
       Voltage: <strong><span id="voltageVal">--</span></strong> V
     </p>
+    <!-- Changed to daily energy usage -->
     <p class="reading">
-      Total Energy Consumed: <strong><span id="energyVal">--</span></strong> kWh
+      Today's Energy Usage: <strong><span id="energyVal">--</span></strong> kWh
+    </p>
+    <!-- Added daily operating cost -->
+    <p class="reading">
+      Daily Operating Cost: <strong><span id="costVal">--</span></strong> Tk
     </p>
 
     <div class="mt-4">
@@ -140,24 +145,26 @@
     </div>
   </div>
 <script>
-  // Global variables for live chart data
-  let liveChartData = Array(60).fill(null);
-  let liveChartLabels = Array(60).fill('');
+  // Electricity rate (Tk per kWh)
+  const ELECTRICITY_RATE = 7.20; // Tk per kWh for residential customers
+
+  // Global variables for live chart data - now stores full readings
+  let liveReadings = Array(60).fill(null);
 
   // Chart 1: Live Power Chart (last 60 readings = 5 hours)
   const liveCtx = document.getElementById('liveChart').getContext('2d');
   const liveChart = new Chart(liveCtx, {
     type: 'line',
     data: {
-      labels: liveChartLabels,
+      labels: Array(60).fill(''),
       datasets: [{
         label: 'Live Power (W)',
-        data: liveChartData,
-        borderWidth: 3,  // Thicker line
+        data: Array(60).fill(null),
+        borderWidth: 3,
         borderColor: '#007bff',
         backgroundColor: 'rgba(0,123,255,0.2)',
         tension: 0.3,
-        pointRadius: 3,  // Visible points
+        pointRadius: 3,
         pointBackgroundColor: '#007bff'
       }]
     },
@@ -168,10 +175,9 @@
         x: {
           ticks: {
             color: '#000',
-            font: { size: 14 },  // Larger font
+            font: { size: 14 },
             maxTicksLimit: 12,
             callback: function(value, index) {
-              // Only show every 5th label to prevent crowding
               return index % 5 === 0 ? this.getLabelForValue(value) : '';
             }
           },
@@ -183,7 +189,7 @@
           min: 0,
           ticks: {
             color: '#000',
-            font: { size: 14 }  // Larger font
+            font: { size: 14 }
           },
           grid: {
             color: 'rgba(0,0,0,0.1)'
@@ -194,14 +200,28 @@
         legend: {
           labels: {
             color: '#000',
-            font: { size: 16 }  // Larger font
+            font: { size: 16 }
           }
         },
         tooltip: {
           backgroundColor: 'rgba(0,0,0,0.7)',
           titleFont: { size: 16 },
           bodyFont: { size: 14 },
-          padding: 10
+          padding: 10,
+          callbacks: {
+            // Enhanced tooltip to show power, voltage and current
+            label: function(context) {
+              const index = context.dataIndex;
+              const reading = liveReadings[index];
+              if (!reading) return 'No data';
+              
+              return [
+                `Power: ${reading.power.toFixed(2)} W`,
+                `Voltage: ${reading.voltage.toFixed(2)} V`,
+                `Current: ${(reading.current * 1000).toFixed(2)} mA`
+              ];
+            }
+          }
         }
       },
       animation: {
@@ -231,15 +251,14 @@
       maintainAspectRatio: false,
       scales: {
         x: {
-          offset: false, // Ensures chart starts at the left edge
+          offset: false,
           ticks: {
             color: '#000',
             font: { size: 14 },
-            maxTicksLimit: 30, // Increased to show more labels
+            maxTicksLimit: 30,
             autoSkip: true,
             autoSkipPadding: 10,
             callback: function(value, index) {
-              // Show labels at regular intervals
               if (index % 5 === 0) {
                 return this.getLabelForValue(value);
               }
@@ -275,7 +294,6 @@
           padding: 10,
           callbacks: {
             title: function(tooltipItems) {
-              // Show full timestamp in tooltip
               return historyChart.data.labels[tooltipItems[0].dataIndex];
             }
           }
@@ -295,7 +313,6 @@
     const now = new Date();
     const labels = [];
     
-    // Create labels for last 5 hours in 5-minute intervals
     for (let i = 59; i >= 0; i--) {
       const time = new Date(now - i * 5 * 60 * 1000);
       labels.push(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -305,22 +322,54 @@
     liveChart.update();
   }
 
-  // Update live chart with new reading
-  function updateLiveChart(power) {
+  // Update live chart with new reading (now stores full reading)
+  function updateLiveChart(reading) {
     // Shift out the oldest data point
-    liveChartData.shift();
-    // Add new data point at the end
-    liveChartData.push(power);
+    liveReadings.shift();
+    // Add new reading at the end
+    liveReadings.push({
+      power: reading.power,
+      voltage: reading.voltage,
+      current: reading.current,
+      timestamp: new Date()
+    });
     
-    // Update the current time for the last label
+    // Update labels
     const now = new Date();
-    liveChartLabels.shift();
-    liveChartLabels.push(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    liveChart.data.labels.shift();
+    liveChart.data.labels.push(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     
-    // Update chart
-    liveChart.data.datasets[0].data = liveChartData;
-    liveChart.data.labels = liveChartLabels;
+    // Update chart data (power only for the line chart)
+    const powerData = liveReadings.map(r => r ? r.power : null);
+    liveChart.data.datasets[0].data = powerData;
     liveChart.update();
+  }
+
+  // Calculate daily energy and cost
+  function calculateDailyEnergyAndCost(rows) {
+    // Get today's date at midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let dailyEnergy = 0;
+    let dailyCost = 0;
+    
+    rows.forEach(r => {
+      const rowDate = new Date(r.ts);
+      if (rowDate >= today) {
+        // Calculate energy in kWh: power (W) * time (hours)
+        // Each reading is 5 minutes = 5/60 hours
+        dailyEnergy += r.power * (5/60) / 1000;
+      }
+    });
+    
+    // Calculate daily cost
+    dailyCost = dailyEnergy * ELECTRICITY_RATE;
+    
+    return {
+      energy: dailyEnergy,
+      cost: dailyCost
+    };
   }
 
   // Load historical data and initialize charts
@@ -332,12 +381,14 @@
     historyChart.data.labels = [];
     historyChart.data.datasets[0].data = [];
 
-    let totalEnergy = 0;
+    // Calculate daily energy and cost
+    const daily = calculateDailyEnergyAndCost(rows);
+    document.getElementById('energyVal').textContent = daily.energy.toFixed(3);
+    document.getElementById('costVal').textContent = daily.cost.toFixed(2);
 
     // Process all rows for history chart
     rows.forEach(r => {
       const ts = new Date(r.ts);
-      // Use more compact label format: "DD MMM HH:MM"
       const label = ts.toLocaleTimeString([], { 
         hour: '2-digit', 
         minute: '2-digit',
@@ -347,18 +398,13 @@
 
       historyChart.data.labels.push(label);
       historyChart.data.datasets[0].data.push(r.power);
-
-      totalEnergy += r.power / 1000 * (5 / 60);  // 5-minute interval
     });
 
-    // Update total energy
-    document.getElementById('energyVal').textContent = totalEnergy.toFixed(3);
-    
     // Update history chart
     historyChart.update();
     
     // Initialize live chart if not already initialized
-    if (liveChartData[0] === null) {
+    if (liveReadings[0] === null) {
       const now = Date.now();
       const fiveHoursAgo = now - 5 * 60 * 60 * 1000;
       
@@ -366,15 +412,20 @@
       rows.forEach(r => {
         const ts = new Date(r.ts).getTime();
         if (ts > fiveHoursAgo) {
-          // Find position in chart (5-minute intervals)
           const position = Math.floor((ts - fiveHoursAgo) / (5 * 60 * 1000));
           if (position >= 0 && position < 60) {
-            liveChartData[position] = r.power;
+            liveReadings[position] = {
+              power: r.power,
+              voltage: r.voltage,
+              current: r.current
+            };
           }
         }
       });
       
-      liveChart.data.datasets[0].data = liveChartData;
+      // Update chart with power data
+      const powerData = liveReadings.map(r => r ? r.power : null);
+      liveChart.data.datasets[0].data = powerData;
       liveChart.update();
     }
   }
@@ -397,7 +448,11 @@
       const now = new Date();
       const minutes = now.getMinutes();
       if (minutes % 5 === 0) {
-        updateLiveChart(s.power);
+        updateLiveChart({
+          power: s.power,
+          voltage: s.voltage,
+          current: s.current
+        });
       }
     } catch (e) {
       console.error('Error fetching status:', e);
